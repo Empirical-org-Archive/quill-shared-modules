@@ -6,12 +6,35 @@ import {
   getMissingWordsFromResponses,
   getPOSForWord,
   getFeedbackForWord,
-  extractSentencesFromResponses
+  extractSentencesFromResponses,
+	checkForMissingWords,
 } from '../../src/libs/requiredWords';
 import {
   getPartsOfSpeechWordsWithTags,
   checkPOSEquivalancy
 } from '../../src/libs/partsOfSpeechTagging';
+
+// Define example responses for use across multiple tests.
+const responses = [
+	{
+		text: 'The woman in the next room is the teacher.',
+		feedback: "Excellent, that's correct!",
+		optimal: true,
+		key: 1,
+	},
+	{
+		text: 'The female teacher is in the next room.',
+		feedback: 'How do you refer to one specific teacher?',
+		optimal: true,
+		key: 2,
+	},
+	{
+		text: 'The teacher is the woman in the next room.',
+		feedback: 'How do you refer to one specific teacher?',
+		optimal: true,
+		key: 3,
+	}
+];
 
 describe('Finding the common words in multiple sentences', () => {
   const sentences = [
@@ -101,26 +124,6 @@ describe('Detecting if a string is missing a required word', () => {
 });
 
 describe('Finding the common words in multiple sentences', () => {
-  const responses = [
-    {
-      text: 'The woman in the next room is the teacher.',
-      feedback: "Excellent, that's correct!",
-      optimal: true,
-      key: 1,
-    },
-    {
-      text: 'The female teacher is in the next room.',
-      feedback: 'How do you refer to one specific teacher?',
-      optimal: true,
-      key: 2,
-    },
-    {
-      text: 'The teacher is the woman in the next room.',
-      feedback: 'How do you refer to one specific teacher?',
-      optimal: true,
-      key: 3,
-    }
-  ];
   const user = 'The woman in the room is the teacher.';
 
   it('returns the common missing words', () => {
@@ -151,5 +154,15 @@ describe('Finding the common words in multiple sentences', () => {
     ];
     const userSemi = 'The woman in the next; room is the teacher.';
     expect(getMissingWordsFromResponses(userSemi, extractSentencesFromResponses(responses))).toEqual(expected);
+  });
+});
+
+describe('Finding missing words in multiple sentences', () => {
+  it('Should provide feedback on the first missing word', () => {
+	  const userString = 'The woman in the room is the teacher.';
+	  const expected = {
+	    feedback: '<p>Revise your sentence to include the word <em>next</em>. You may have misspelled it.</p>',
+    };
+	  expect(checkForMissingWords(userString, responses)).toEqual(expected);
   });
 });
